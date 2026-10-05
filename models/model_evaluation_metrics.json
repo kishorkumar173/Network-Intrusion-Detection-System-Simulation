@@ -1,0 +1,50 @@
+{
+  "random_forest": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "confusion_matrix": [
+      [
+        840,
+        0
+      ],
+      [
+        0,
+        360
+      ]
+    ]
+  },
+  "logistic_regression": {
+    "accuracy": 0.9875,
+    "precision": 1.0,
+    "recall": 0.9583333333333334,
+    "f1": 0.9787234042553191,
+    "confusion_matrix": [
+      [
+        840,
+        0
+      ],
+      [
+        15,
+        345
+      ]
+    ]
+  },
+  "isolation_forest": {
+    "accuracy": 0.805,
+    "precision": 0.6060606060606061,
+    "recall": 1.0,
+    "f1": 0.7547169811320755,
+    "confusion_matrix": [
+      [
+        606,
+        234
+      ],
+      [
+        0,
+        360
+      ]
+    ]
+  }
+}
