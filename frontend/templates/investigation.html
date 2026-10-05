@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}SOC Event Investigation | Network IDS{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <!-- Left Column: Search & Alert Metadata -->
+    <div class="col-lg-8">
+        <!-- Alert Selector Bar -->
+        <div class="card cyber-card mb-3">
+            <div class="card-body py-2">
+                <div class="row align-items-center g-2">
+                    <div class="col-md-3">
+                        <label class="form-label text-secondary small mb-0 fw-semibold">INVESTIGATE ALERT ID:</label>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary font-monospace"
+                               id="input-alert-id" value="{{ alert_id }}" placeholder="e.g. ALT-XXXXXXXX">
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-sm btn-info w-100" onclick="fetchAlertDetails()">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i> Load Alert
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Alert Details Card -->
+        <div class="card cyber-card mb-3" id="alert-details-container">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge" id="inv-severity-badge">SEVERITY</span>
+                    <h5 class="mb-0 fw-bold font-monospace" id="inv-alert-id">ALT-00000000</h5>
+                </div>
+                <span class="badge bg-secondary font-monospace" id="inv-status-badge">STATUS</span>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark border-secondary-subtle mb-3">
+                    <div class="fw-bold text-light mb-1" id="inv-alert-type"><i class="fa-solid fa-crosshairs text-warning me-2"></i>Detection Type</div>
+                    <div class="text-secondary small font-monospace" id="inv-description">Description of alert trigger and rule condition.</div>
+                </div>
+
+                <!-- 2x2 Telemetry Grid -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded bg-dark border border-secondary font-monospace">
+                            <div class="text-secondary small text-uppercase fw-semibold mb-2"><i class="fa-solid fa-network-wired text-info me-1"></i>Communication Endpoints</div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-secondary">Source:</span>
+                                <span class="text-light fw-bold" id="inv-src">192.0.2.15:49152</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-secondary">Destination:</span>
+                                <span class="text-light fw-bold" id="inv-dst">198.51.100.20:443</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary">Protocol:</span>
+                                <span class="badge bg-secondary-subtle text-info border border-info-subtle" id="inv-proto">TCP</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded bg-dark border border-secondary font-monospace">
+                            <div class="text-secondary small text-uppercase fw-semibold mb-2"><i class="fa-solid fa-chart-simple text-success me-1"></i>Traffic Flow Telemetry</div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-secondary">Packet Count:</span>
+                                <span class="text-light fw-bold" id="inv-packets">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-secondary">Byte Count:</span>
+                                <span class="text-light fw-bold" id="inv-bytes">0 B</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary">Flow Duration:</span>
+                                <span class="text-light fw-bold" id="inv-duration">0.0s</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hybrid Multi-Layer Risk Decomposition -->
+                <h6 class="fw-bold mb-3 text-light text-uppercase font-monospace" style="font-size: 0.85rem;">
+                    <i class="fa-solid fa-microchip text-warning me-2"></i>Multi-Layer Detection Signal Analysis
+                </h6>
+                <div class="row g-2 mb-4">
+                    <div class="col-md-3 col-6">
+                        <div class="p-2 rounded bg-dark border border-secondary text-center">
+                            <div class="text-secondary small">Signature Match</div>
+                            <div class="fw-bold text-warning fs-5" id="inv-rule-id">IDS-001</div>
+                            <small class="text-secondary font-monospace" style="font-size: 0.7rem;">Rule Engine</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="p-2 rounded bg-dark border border-secondary text-center">
+                            <div class="text-secondary small">Anomaly Score</div>
+                            <div class="fw-bold text-info fs-5" id="inv-anomaly-score">0.0</div>
+                            <small class="text-secondary font-monospace" style="font-size: 0.7rem;">Z-Score Baseline</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="p-2 rounded bg-dark border border-secondary text-center">
+                            <div class="text-secondary small">ML Probability</div>
+                            <div class="fw-bold text-purple fs-5" id="inv-ml-prob">0.0%</div>
+                            <small class="text-secondary font-monospace" style="font-size: 0.7rem;">Random Forest</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="p-2 rounded bg-dark border border-danger text-center">
+                            <div class="text-secondary small">Final Risk Score</div>
+                            <div class="fw-bold text-danger fs-5" id="inv-risk-score">0 / 100</div>
+                            <small class="text-secondary font-monospace" style="font-size: 0.7rem;">Hybrid Score</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommended SOC Defensive Playbook -->
+                <h6 class="fw-bold mb-2 text-light text-uppercase font-monospace" style="font-size: 0.85rem;">
+                    <i class="fa-solid fa-shield-virus text-success me-2"></i>Defensive Playbook & Recommended Actions
+                </h6>
+                <div class="p-3 rounded bg-dark border border-secondary mb-3">
+                    <ul class="mb-0 text-secondary small font-monospace" id="inv-playbook-steps">
+                        <li>Loading playbook steps...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Status Transition & Incident Documentation Notes -->
+    <div class="col-lg-4">
+        <!-- Status Management Card -->
+        <div class="card cyber-card mb-3">
+            <div class="card-header">
+                <span class="fw-semibold"><i class="fa-solid fa-sliders text-info me-2"></i>Triage Workflow Action</span>
+            </div>
+            <div class="card-body">
+                <label class="form-label text-secondary small fw-semibold">UPDATE INCIDENT STATUS:</label>
+                <div class="d-grid gap-2 mb-3">
+                    <button class="btn btn-outline-primary btn-sm text-start" onclick="updateStatus('INVESTIGATING')">
+                        <i class="fa-solid fa-magnifying-glass me-2"></i>Mark as <strong>INVESTIGATING</strong>
+                    </button>
+                    <button class="btn btn-outline-success btn-sm text-start" onclick="updateStatus('RESOLVED')">
+                        <i class="fa-solid fa-check-double me-2"></i>Mark as <strong>RESOLVED (Mitigated)</strong>
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm text-start" onclick="updateStatus('FALSE_POSITIVE')">
+                        <i class="fa-solid fa-ban me-2"></i>Mark as <strong>FALSE POSITIVE</strong>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Incident Notes & Timeline Card -->
+        <div class="card cyber-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold"><i class="fa-solid fa-clipboard-list text-warning me-2"></i>Analyst Notes Timeline</span>
+            </div>
+            <div class="card-body">
+                <!-- Add Note Form -->
+                <div class="mb-3">
+                    <label class="form-label text-secondary small fw-semibold">ADD INVESTIGATIVE NOTE:</label>
+                    <textarea class="form-control form-control-sm bg-dark text-light border-secondary font-monospace mb-2"
+                              id="input-analyst-note" rows="3" placeholder="Enter findings, host verification, firewall tickets..."></textarea>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary w-50"
+                               id="input-analyst-name" value="SOC Analyst (Tier 1)">
+                        <button class="btn btn-sm btn-info" onclick="submitAnalystNote()">
+                            <i class="fa-solid fa-plus me-1"></i> Post Note
+                        </button>
+                    </div>
+                </div>
+
+                <hr class="border-secondary">
+
+                <!-- Existing Notes Timeline -->
+                <div id="notes-timeline" style="max-height: 280px; overflow-y: auto;">
+                    <div class="text-center text-secondary py-3 small font-monospace">No notes recorded yet.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/investigation.js') }}"></script>
+{% endblock %}

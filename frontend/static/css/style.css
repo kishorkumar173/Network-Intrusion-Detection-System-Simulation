@@ -1,0 +1,117 @@
+/* Modern SOC Cyber Theme */
+:root {
+    --bg-dark: #090d16;
+    --card-bg: #111726;
+    --border-color: #1e293b;
+    --accent-cyan: #06b6d4;
+    --accent-emerald: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-rose: #f43f5e;
+    --accent-purple: #8b5cf6;
+}
+
+body.cyber-bg {
+    background-color: var(--bg-dark);
+    color: #e2e8f0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+}
+
+.tracking-wide {
+    letter-spacing: 0.05em;
+}
+
+.font-monospace {
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Navbar */
+.cyber-nav {
+    background-color: #0d1322 !important;
+}
+
+/* Cyber Cards */
+.cyber-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.cyber-card .card-header {
+    background-color: rgba(13, 19, 34, 0.7);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+}
+
+/* Metric Cards */
+.metric-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+.border-start-info {
+    border-left: 4px solid var(--accent-cyan) !important;
+}
+
+.border-start-success {
+    border-left: 4px solid var(--accent-emerald) !important;
+}
+
+.border-start-warning {
+    border-left: 4px solid var(--accent-amber) !important;
+}
+
+.border-start-primary {
+    border-left: 4px solid #3b82f6 !important;
+}
+
+.border-start-danger {
+    border-left: 4px solid var(--accent-rose) !important;
+}
+
+.border-start-purple {
+    border-left: 4px solid var(--accent-purple) !important;
+}
+
+.text-purple {
+    color: var(--accent-purple) !important;
+}
+
+/* Pulse animation for live monitoring */
+.pulse-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        transform: scale(1.15);
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+/* Custom Table Adjustments */
+.table-dark {
+    --bs-table-bg: var(--card-bg);
+    --bs-table-border-color: var(--border-color);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(30, 41, 59, 0.6);
+}

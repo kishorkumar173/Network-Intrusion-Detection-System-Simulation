@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Incident Management & Correlation | Network IDS{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card cyber-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold"><i class="fa-solid fa-sitemap text-info me-2"></i>Correlated Security Incidents & Lifecycle Tracking</span>
+                <span class="badge bg-secondary font-monospace">SOC Tier 1 / Tier 2 Queue</span>
+            </div>
+            <div class="card-body">
+                <p class="text-secondary small font-monospace">
+                    The correlation engine clusters raw individual detection alerts by Source IP and Detection Signature
+                    within a rolling 60-second window to prevent alert fatigue.
+                </p>
+
+                <div class="table-responsive">
+                    <table class="table table-hover table-dark align-middle mb-0 font-monospace" style="font-size: 0.85rem;">
+                        <thead class="table-secondary text-uppercase" style="font-size: 0.75rem;">
+                            <tr>
+                                <th class="ps-3">Incident ID</th>
+                                <th>Source Host</th>
+                                <th>Incident Category</th>
+                                <th>Severity</th>
+                                <th>Peak Risk</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th class="text-end pe-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incidents-table-body">
+                            <tr>
+                                <td colspan="8" class="text-center text-secondary py-4">
+                                    <i class="fa-solid fa-spinner fa-spin me-2"></i>Loading incident correlations...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadIncidentManagement() {
+    try {
+        const resp = await fetch('/api/alerts?limit=100');
+        const data = await resp.json();
+        const alerts = data.alerts || [];
+
+        const tbody = document.getElementById('incidents-table-body');
+        if (alerts.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-secondary py-4 font-monospace">No security incidents detected in log.</td></tr>';
+            return;
+        }
+
+        // Group by Source IP and Alert Type
+        const clusters = {};
+        alerts.forEach(a => {
+            const key = `${a.source_ip}:${a.alert_type}`;
+            if (!clusters[key]) {
+                clusters[key] = {
+                    incident_id: 'INC-' + a.alert_id.replace('ALT-', ''),
+                    source_ip: a.source_ip,
+                    destination_ip: a.destination_ip,
+                    alert_type: a.alert_type,
+                    severity: a.severity,
+                    max_risk: a.risk_score,
+                    status: a.status,
+                    created_at: a.created_at,
+                    sample_alert_id: a.alert_id,
+                    count: 1
+                };
+            } else {
+                clusters[key].count += 1;
+                clusters[key].max_risk = Math.max(clusters[key].max_risk, a.risk_score);
+            }
+        });
+
+        tbody.innerHTML = '';
+        Object.values(clusters).forEach(inc => {
+            let sevClass = 'bg-secondary';
+            if (inc.severity === 'CRITICAL') sevClass = 'bg-danger text-light';
+            else if (inc.severity === 'HIGH') sevClass = 'bg-warning text-dark';
+            else if (inc.severity === 'MEDIUM') sevClass = 'bg-primary text-light';
+            else if (inc.severity === 'LOW') sevClass = 'bg-info text-dark';
+
+            let statusClass = 'bg-secondary';
+            if (inc.status === 'NEW') statusClass = 'bg-danger-subtle text-danger border border-danger-subtle';
+            else if (inc.status === 'INVESTIGATING') statusClass = 'bg-warning-subtle text-warning border border-warning-subtle';
+            else if (inc.status === 'RESOLVED') statusClass = 'bg-success-subtle text-success border border-success-subtle';
+            else if (inc.status === 'FALSE_POSITIVE') statusClass = 'bg-secondary-subtle text-secondary';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="ps-3 fw-bold text-info">${inc.incident_id}</td>
+                <td><span class="badge bg-dark border border-secondary">${inc.source_ip}</span></td>
+                <td>${inc.alert_type} ${inc.count > 1 ? `<span class="badge bg-secondary ms-1">x${inc.count}</span>` : ''}</td>
+                <td><span class="badge ${sevClass}">${inc.severity}</span></td>
+                <td><span class="fw-bold ${inc.max_risk > 70 ? 'text-danger' : 'text-warning'}">${inc.max_risk}/100</span></td>
+                <td><span class="badge ${statusClass}">${inc.status}</span></td>
+                <td class="text-secondary small">${inc.created_at}</td>
+                <td class="text-end pe-3">
+                    <a href="/investigation?alert_id=${inc.sample_alert_id}" class="btn btn-sm btn-outline-info">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i> Triage
+                    </a>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (e) {
+        console.error("Error loading incidents:", e);
+    }
+}
+document.addEventListener('DOMContentLoaded', loadIncidentManagement);
+</script>
+{% endblock %}
